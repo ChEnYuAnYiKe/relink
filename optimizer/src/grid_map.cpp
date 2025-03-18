@@ -422,7 +422,7 @@ visualization_msgs::Marker GridMap::drawGridMap() {
     graph.ns = "grid_map";
     graph.type = visualization_msgs::Marker::CUBE_LIST;
     graph.action = visualization_msgs::Marker::ADD;
-    graph.header.frame_id = "/world";
+    graph.header.frame_id = "world";
     graph.pose.position.x = graph.pose.position.y = graph.pose.position.z = 0.0;
     graph.pose.orientation.x = 0;
     graph.pose.orientation.y = 0;

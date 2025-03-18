@@ -131,7 +131,7 @@ int main(int argc, char **argv)
     ros::Subscriber sub_uav = n.subscribe<message_files::PoseStampedArray>("/uav_pos", 10, boost::bind(updateEntityPoseCallback, _1, boost::ref(uav_poses), UAV));
     ros::Subscriber sub_solution = n.subscribe<message_files::PoseStampedArray>("/optimizer/solution", 10, boost::bind(updateEntityPoseCallback, _1, boost::ref(solution_poses), SOLUTION));
 
-    curr_marker.header.frame_id = std::string("/world");
+    curr_marker.header.frame_id = std::string("world");
     curr_marker.pose.position.x = 0;
     curr_marker.pose.position.y = 0;
     curr_marker.pose.position.z = 0;
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
     type_config[UAV]->scale = n.param("uav_size", 0.6);
     type_config[SOLUTION]->scale = n.param("uav_size", 0.6);
 
-    edge_list.header.frame_id = std::string("/world");
+    edge_list.header.frame_id = std::string("world");
     edge_list.header.stamp = ros::Time::now();
     edge_list.ns = std::string("edge");  // type-specified later
     edge_list.type = visualization_msgs::Marker::LINE_LIST;

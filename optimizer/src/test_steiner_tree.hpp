@@ -601,7 +601,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_grid_or_network,
     graph.id = 0;
     graph.type = visualization_msgs::Marker::CUBE_LIST;
     graph.action = visualization_msgs::Marker::ADD;
-    graph.header.frame_id = "/world";
+    graph.header.frame_id = "world";
     graph.pose.position.x = graph.pose.position.y = graph.pose.position.z = 0.0;
     graph.pose.orientation.x = 0;
     graph.pose.orientation.y = 0;
@@ -631,7 +631,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_grid_or_network,
     tree.id = 0;
     tree.type = visualization_msgs::Marker::CUBE_LIST;
     tree.action = visualization_msgs::Marker::ADD;
-    tree.header.frame_id = "/world";
+    tree.header.frame_id = "world";
     tree.pose.position.x = tree.pose.position.y = tree.pose.position.z = 0.0;
     tree.pose.orientation.x = 0;
     tree.pose.orientation.y = 0;
@@ -662,7 +662,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_grid_or_network,
     network.id = 0;
     network.type = visualization_msgs::Marker::LINE_LIST;
     network.action = visualization_msgs::Marker::ADD;
-    network.header.frame_id = "/world";
+    network.header.frame_id = "world";
     network.pose.position.x = network.pose.position.y = network.pose.position.z = 0.0;
     network.pose.orientation.x = 0;
     network.pose.orientation.y = 0;

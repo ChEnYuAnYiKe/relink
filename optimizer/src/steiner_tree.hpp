@@ -738,7 +738,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_tree_network,
     visualization_msgs::MarkerArray deleteall;
     visualization_msgs::Marker tmp;
     tmp.action = visualization_msgs::Marker::DELETEALL;
-    tmp.header.frame_id = "/world";
+    tmp.header.frame_id = "world";
     tmp.ns = "grid_map";
     tmp.id = 2;
     deleteall.markers.push_back(tmp);
@@ -757,7 +757,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_tree_network,
     // graph.ns = "grid_map";
     // graph.type = visualization_msgs::Marker::CUBE_LIST;
     // graph.action = visualization_msgs::Marker::ADD;
-    // graph.header.frame_id = "/world";
+    // graph.header.frame_id = "world";
     // graph.pose.position.x = graph.pose.position.y = graph.pose.position.z = 0.0;
     // graph.pose.orientation.x = 0;
     // graph.pose.orientation.y = 0;
@@ -786,7 +786,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_tree_network,
     tree.ns = "tree_node";
     tree.type = visualization_msgs::Marker::CUBE_LIST;
     tree.action = visualization_msgs::Marker::ADD;
-    tree.header.frame_id = "/world";
+    tree.header.frame_id = "world";
     tree.pose.position.x = tree.pose.position.y = tree.pose.position.z = 0.0;
     tree.pose.orientation.x = 0;
     tree.pose.orientation.y = 0;
@@ -816,7 +816,7 @@ void visualize_visibility_graph(const ros::Publisher &pub_tree_network,
     network.ns = "tree_edge";
     network.type = visualization_msgs::Marker::LINE_LIST;
     network.action = visualization_msgs::Marker::ADD;
-    network.header.frame_id = "/world";
+    network.header.frame_id = "world";
     network.pose.position.x = network.pose.position.y = network.pose.position.z = 0.0;
     network.pose.orientation.x = 0;
     network.pose.orientation.y = 0;

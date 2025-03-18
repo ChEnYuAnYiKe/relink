@@ -54,7 +54,7 @@ void clickCallback(const geometry_msgs::PoseStampedPtr &msg) {
 // };
 message_files::PoseStampedArray solveOptimalPoseCentrally(const std::set<std::shared_ptr<SteinerTreeNode>>& tree_node_set, StarConvexOptimizer& optimizer) {
     message_files::PoseStampedArray curr_solutions;
-    curr_solutions.header.frame_id = "/world";
+    curr_solutions.header.frame_id = "world";
 
     bool no_solution_yet = scp_generator.solution_poses.empty();
     for (shared_ptr<SteinerTreeNode> TreeNodePtr : tree_node_set) {
@@ -108,7 +108,7 @@ message_files::PoseStampedArray solveOptimalPoseCentrally(const std::set<std::sh
 
 message_files::PoseStampedArray noOptimization(const std::set<std::shared_ptr<SteinerTreeNode>>& tree_node_set, StarConvexOptimizer& optimizer) {
     message_files::PoseStampedArray curr_solutions;
-    curr_solutions.header.frame_id = "/world";
+    curr_solutions.header.frame_id = "world";
 
     bool no_solution_yet = scp_generator.solution_poses.empty();
     for (shared_ptr<SteinerTreeNode> TreeNodePtr : tree_node_set) {
@@ -133,7 +133,7 @@ message_files::PoseStampedArray noOptimization(const std::set<std::shared_ptr<St
 
 message_files::PoseStampedArray solveOptimalPoseSeparately(const std::set<std::shared_ptr<SteinerTreeNode>>& tree_node_set, StarConvexOptimizer& optimizer) {
     message_files::PoseStampedArray curr_solutions;
-    curr_solutions.header.frame_id = "/world";
+    curr_solutions.header.frame_id = "world";
 
     // TODO: priority of optimization or other distributed optimization scheme
     std::deque<std::pair<unsigned, shared_ptr<SteinerTreeNode>>> q;

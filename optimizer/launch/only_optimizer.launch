@@ -21,7 +21,7 @@
         <param name="resolution" value="0.1" />
 
         <!--世界坐标系话题，一般为map-->
-        <param name="frame_id" type="string" value="/world" />
+        <param name="frame_id" type="string" value="world" />
 
         <param name="sensor_model/max_range" value="1000.0" />
         <param name="latch" value="true" />

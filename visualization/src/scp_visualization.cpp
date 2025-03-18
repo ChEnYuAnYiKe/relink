@@ -57,7 +57,7 @@ Point flip(Point x_, double ball_radius, const Eigen::Vector3d &c) {
 double ball_radius = 0.0;
 
 void init_SCP_mesh(visualization_msgs::Marker& visualization_SCPs, std::string name, unsigned id, const ros::NodeHandle& n) {
-    visualization_SCPs.header.frame_id = "/world";
+    visualization_SCPs.header.frame_id = "world";
     visualization_SCPs.ns = name;
     visualization_SCPs.id = id;
     visualization_SCPs.type = visualization_msgs::Marker::TRIANGLE_LIST;
