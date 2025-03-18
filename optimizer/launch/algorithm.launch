@@ -9,7 +9,7 @@
     <arg name="grid_resolution" value="5.0"/>
     <!-- ATTENTION! SYNC these in algorithm.launch visualization.launch -->
     <arg name="inflated_global_map" value="/map_generator/global_cloud"/>
-    <arg name="ball_radius_multiplier" value="30.0" />
+    <arg name="ball_radius_multiplier" value="1.0" />
 
     <node pkg="optimizer" name="algorithm" type="algorithm" output="screen">
         <param name="radius_comm" value="$(arg radius_comm)" type="double"/>

@@ -2,7 +2,7 @@
     <arg name="episode_seq" value="1"/>
     <param name="/simulation_seq" value="$(arg episode_seq)" type="int"/>
     <!-- ATTENTION! SYNC these in algorithm.launch visualization.launch map_generator.launch -->
-    <arg name="radius_comm" value="34.0" />
+    <arg name="radius_comm" value="10.0" />
     <arg name="map_size_x" value="50.0"/>
     <arg name="map_size_y" value="50.0"/>
     <arg name="map_size_z" value="5.0"/>

@@ -9,7 +9,6 @@ Panels:
         - /StarConvexPolytope1/Namespaces1
         - /PredictSCPs1/Namespaces1
         - /TreeNodeEdge1/Namespaces1
-        - /Network1
         - /Network1/Namespaces1
         - /Marker1
         - /Marker2
@@ -102,17 +101,16 @@ Visualization Manager:
       Name: Entities
       Namespaces:
         base_station: true
-        solution: false
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /scp_visualization/scp_meshes
       Name: StarConvexPolytope
       Namespaces:
         {}
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /scp_visualization/predict_scp_meshes
@@ -145,7 +143,6 @@ Visualization Manager:
         target_bs_edge: true
         target_target_edge: false
         uav_bs_edge: true
-        uav_target_edge: true
         uav_uav_edge: true
       Queue Size: 100
       Value: true
@@ -586,7 +583,7 @@ Visualization Manager:
       Marker Topic: /uav0/planning/travel_traj
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -618,7 +615,7 @@ Visualization Manager:
       Marker Topic: /uav4/planning/travel_traj
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -626,7 +623,7 @@ Visualization Manager:
       Marker Topic: /uav5/planning/travel_traj
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -665,7 +662,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 34.971229553222656
+      Distance: 60.92375564575195
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -681,9 +678,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6997981667518616
+      Pitch: 0.9847981333732605
       Target Frame: <Fixed Frame>
-      Yaw: 4.896684169769287
+      Yaw: 4.636685848236084
     Saved: ~
 Window Geometry:
   Displays:
