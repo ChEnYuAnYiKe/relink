@@ -64,9 +64,9 @@ public:
     std::map<unsigned, Eigen::Vector3d> bs_poses;
     pcl::KdTreeFLANN<pcl::PointXYZ> global_kd_tree;
     pcl::PointCloud<pcl::PointXYZ> global_pcl;
-    std::map<std::string, size_t> nameid_SCP_index;  // Help optimizer retrieve required SCPs by name_id
+    std::map<std::string, size_t> nameid_SCP_index;         // Help optimizer retrieve required SCPs by name_id
     message_files::StarConvexPolytopesStamped entity_SCPs;  // SCP at real position, for visualization
-    message_files::StarConvexPolytopesStamped predict_SCPs;  // SCP at solution/predict position, for optimization
+    message_files::StarConvexPolytopesStamped predict_SCPs; // SCP at solution/predict position, for optimization
     float radius_comm;
     double ball_radius;
     double voxel_size;
@@ -74,7 +74,8 @@ public:
 
     StarConvexGenerator() = default;
 
-    void init(const ros::NodeHandle &n) {
+    void init(const ros::NodeHandle &n)
+    {
         radius_comm = n.param("radius_comm", 5.0);
         ball_radius = radius_comm * n.param("ball_radius_multiplier", 2.0);
         voxel_size = n.param("down_sampling_size", 0.3);
@@ -98,7 +99,7 @@ public:
     /// \param entity : The position of current entity that expected to generate scp from
     /// \param seq : Marking ID of current star convex, irrelevant to entity type
     /// \return message_files::StarConvexPolytope : Message consist of header, centre point position and scp (by triangle meshes)
-    message_files::StarConvexPolytope getSingleStarConvex(const Eigen::Vector3d &entity, std::string& name_id)
+    message_files::StarConvexPolytope getSingleStarConvex(const Eigen::Vector3d &entity, std::string &name_id)
     {
         // generate bigger star convex
         float radius = radius_comm + 0.0;
@@ -120,9 +121,11 @@ public:
         std::vector<int> idx_in_pcl; // Index in global_kd_tree of retrieved points
         std::vector<float> sqDist;   // The resultant squared distances to the neighboring points
         // Retrieve all points in given radius, no upper bound
-        if (!global_pcl.empty()) global_kd_tree.radiusSearch(target_pose, radius, idx_in_pcl, sqDist);
+        if (!global_pcl.empty())
+            global_kd_tree.radiusSearch(target_pose, radius, idx_in_pcl, sqDist);
         pcl::PointCloud<pcl::PointXYZ> retrieved_points;
-        std::for_each(idx_in_pcl.begin(), idx_in_pcl.end(), [&](int idx) { retrieved_points.push_back(global_pcl[idx]); });
+        std::for_each(idx_in_pcl.begin(), idx_in_pcl.end(), [&](int idx)
+                      { retrieved_points.push_back(global_pcl[idx]); });
 
         // Down-sampling
         pcl::VoxelGrid<pcl::PointXYZ> voxel_handler;
@@ -191,10 +194,11 @@ public:
     {
         // Generate SCP for all real position, solution/predict position
         // TODO: How to implement ID list elegantly
-        predict_SCPs.SCPs.clear(); entity_SCPs.SCPs.clear();
+        predict_SCPs.SCPs.clear();
+        entity_SCPs.SCPs.clear();
         predict_SCPs.header.frame_id = entity_SCPs.header.frame_id = "world";
         predict_SCPs.header.stamp = entity_SCPs.header.stamp = ros::Time::now();
-        size_t index = 0;  // Mark index of SCP in predict_SCPs
+        size_t index = 0; // Mark index of SCP in predict_SCPs
         // Calculate and publish star convex of each entity, published msgs MARK by Header.seq
         message_files::StarConvexPolytope curr_SCP;
 

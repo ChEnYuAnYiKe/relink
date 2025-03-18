@@ -47,8 +47,10 @@ vector<int> KM(const vector<vector<double>> &weights)
 
     vector<int> optimal_match = vector<int>(N, -1);
     vector<double> label_x(N, -INFINITY);
-    for (size_t i = 0; i < N; ++i) {
-        for (size_t j = 0; j < N; ++j) label_x[i] = fmax(label_x[i], weights[i][j]);
+    for (size_t i = 0; i < N; ++i)
+    {
+        for (size_t j = 0; j < N; ++j)
+            label_x[i] = fmax(label_x[i], weights[i][j]);
     }
     vector<double> label_y = vector<double>(N, 0);
 
@@ -98,32 +100,43 @@ map<nodeid_type, int> assign(map<unsigned, Eigen::Vector3d> uav_locs, map<nodeid
     vector<vector<double>> weights(N, vector<double>(N));
     vector<unsigned> uav_id;
     vector<nodeid_type> node_id;
-    for (auto& uav_id_loc : uav_locs) uav_id.push_back(uav_id_loc.first);
-    for (auto& node_id_loc : node_locs) node_id.push_back(node_id_loc.first);
-    
-    for (size_t i = 0; i < N; ++i) {
-        for (size_t j = 0; j < N; ++j) {
+    for (auto &uav_id_loc : uav_locs)
+        uav_id.push_back(uav_id_loc.first);
+    for (auto &node_id_loc : node_locs)
+        node_id.push_back(node_id_loc.first);
+
+    for (size_t i = 0; i < N; ++i)
+    {
+        for (size_t j = 0; j < N; ++j)
+        {
             // KM is for maximum match, so take negative amount to achieve shortest distance
             // if (i < uav_id.size() && j < node_locs.size()) weights[i][j] = -(uav_locs[uav_id[i]] - node_locs[node_id[j]]).norm();
-            if (i < uav_id.size() && j < node_locs.size()) weights[i][j] = -(uav_locs[uav_id[i]] - node_locs[node_id[j]]).squaredNorm();
+            if (i < uav_id.size() && j < node_locs.size())
+                weights[i][j] = -(uav_locs[uav_id[i]] - node_locs[node_id[j]]).squaredNorm();
             // else  weights[i][j] = -1000;
-            else  weights[i][j] = 0;  // give dummy node/UAV higher priority
+            else
+                weights[i][j] = 0; // give dummy node/UAV higher priority
         }
     }
-    auto optimal_match = KM(weights);  // index: node id, value: uav id
-    for (int i = 0; i < N; ++i) {
+    auto optimal_match = KM(weights); // index: node id, value: uav id
+    for (int i = 0; i < N; ++i)
+    {
         printf("[DEBUG] Optimal match: Node %d <--> UAV %d\n", i, optimal_match[i]);
     }
 
     // TODO: UAV amount greater than nodes
     printf("[KM] Optimal match:\n");
     map<nodeid_type, int> node_uav;
-    for (size_t node_index = 0; node_index < N; ++node_index) {
-        if (node_index < node_locs.size()) {
+    for (size_t node_index = 0; node_index < N; ++node_index)
+    {
+        if (node_index < node_locs.size())
+        {
             // Real nodes. Assume UAV is enough to cover existing nodes
             node_uav[node_id[node_index]] = uav_id[optimal_match[node_index]];
             printf("[node: id %d] <--> [uav: id %d]\n", node_id[node_index], uav_id[optimal_match[node_index]]);
-        } else {
+        }
+        else
+        {
             // Dummy nodes due to extra UAV
             printf("[node: DUMMY] <--> [uav: id %d]\n", uav_id[optimal_match[node_index]]);
         }

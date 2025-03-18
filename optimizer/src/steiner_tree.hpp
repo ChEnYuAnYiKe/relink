@@ -33,30 +33,35 @@ using namespace std;
 #define DISADJ 0
 typedef double weight_type;
 typedef unsigned nodeid_type;
-size_t VERTICES;  // Define the number of vertices |V| in the graph G = (V,E), SET BY algorithm.cpp
+size_t VERTICES;                            // Define the number of vertices |V| in the graph G = (V,E), SET BY algorithm.cpp
 map<nodeid_type, std::string> node_to_name; // Map from vg node id to initial identifier of entity, format "typeid" (no other chars)
-unsigned available_uav_num = 0;  // used to tell max available UAV count
-unsigned uav_num = 0;  // used to record spawned UAV count
-unsigned last_uav_requirement = 0;  // used to mark UAV count requirement calculated in last iteration
+unsigned available_uav_num = 0;             // used to tell max available UAV count
+unsigned uav_num = 0;                       // used to record spawned UAV count
+unsigned last_uav_requirement = 0;          // used to mark UAV count requirement calculated in last iteration
 
 const nodeid_type dummy_root_id = INT_MAX;
-struct SteinerTreeNode {
-    std::string node_type_id;  // entity identifier
-    nodeid_type id;  // corresponding node id in grid map
-    Eigen::Vector3d pos;  // real position for exisiting entity, goal position for UAV
+struct SteinerTreeNode
+{
+    std::string node_type_id; // entity identifier
+    nodeid_type id;           // corresponding node id in grid map
+    Eigen::Vector3d pos;      // real position for exisiting entity, goal position for UAV
     set<shared_ptr<SteinerTreeNode>> children;
     shared_ptr<SteinerTreeNode> parent;
     set<shared_ptr<SteinerTreeNode>> neighbours;
 
-    explicit SteinerTreeNode(nodeid_type id) {
+    explicit SteinerTreeNode(nodeid_type id)
+    {
         this->id = id;
     }
 
-    SteinerTreeNode(nodeid_type id, Eigen::Vector3d pos) {
+    SteinerTreeNode(nodeid_type id, Eigen::Vector3d pos)
+    {
         this->id = id;
         this->pos = std::move(pos);
-        if (node_to_name.count(id)) node_type_id = node_to_name[id];
-        else node_type_id = "";
+        if (node_to_name.count(id))
+            node_type_id = node_to_name[id];
+        else
+            node_type_id = "";
     }
 };
 
@@ -169,12 +174,14 @@ public:
      * @param roots: Corresponding grid map node id of base stations, to specify the forest
      * @return Dummy root of the tree structure generated (the children of this node are nodes correspond to base stations)
      * */
-    shared_ptr<SteinerTreeNode> BuildTreeFromEdgeList(const vector<edge>& E, const vector<nodeid_type>& roots) {
+    shared_ptr<SteinerTreeNode> BuildTreeFromEdgeList(const vector<edge> &E, const vector<nodeid_type> &roots)
+    {
         // Initialize with one dummy root
         map<nodeid_type, shared_ptr<SteinerTreeNode>> Index_to_NodePtr;
         shared_ptr<SteinerTreeNode> dummy_root = make_shared<SteinerTreeNode>(dummy_root_id, interface->adjMatIdx2coord(dummy_root_id));
         Index_to_NodePtr[dummy_root_id] = dummy_root;
-        for (nodeid_type root_id : roots) {
+        for (nodeid_type root_id : roots)
+        {
             auto current_node = make_shared<SteinerTreeNode>(root_id, interface->adjMatIdx2coord(root_id));
             Index_to_NodePtr[root_id] = current_node;
             current_node->parent = dummy_root;
@@ -184,16 +191,22 @@ public:
         // Build the tree start from roots built above. Orderly to keep the direct
         size_t edge_count = E.size();
         vector<int> edge_visited(edge_count, 0);
-        while (edge_count) {
-            for (size_t idx = 0; idx < E.size(); ++idx) {
-                if (edge_visited[idx]) continue;
+        while (edge_count)
+        {
+            for (size_t idx = 0; idx < E.size(); ++idx)
+            {
+                if (edge_visited[idx])
+                    continue;
                 auto curr_edge = E[idx];
-                for (auto [v1, v2] : {pair<nodeid_type, nodeid_type>{curr_edge.vertex1, curr_edge.vertex2}, pair<nodeid_type, nodeid_type>{curr_edge.vertex2, curr_edge.vertex1}}) {
+                for (auto [v1, v2] : {pair<nodeid_type, nodeid_type>{curr_edge.vertex1, curr_edge.vertex2}, pair<nodeid_type, nodeid_type>{curr_edge.vertex2, curr_edge.vertex1}})
+                {
                     auto it = Index_to_NodePtr.find(v1);
-                    if (it == Index_to_NodePtr.end()) continue;
+                    if (it == Index_to_NodePtr.end())
+                        continue;
 
                     // If at least one node already in the tree, add the tree edge and remove it from edge list (lazy)
-                    if (!Index_to_NodePtr.count(v2)) {
+                    if (!Index_to_NodePtr.count(v2))
+                    {
                         Index_to_NodePtr[v2] = make_shared<SteinerTreeNode>(v2, interface->adjMatIdx2coord(v2));
                     }
                     shared_ptr<SteinerTreeNode> next_node_ptr = Index_to_NodePtr[v2];
@@ -201,7 +214,7 @@ public:
                     next_node_ptr->parent = it->second;
                     edge_visited[idx] = 1;
                     --edge_count;
-//                    ROS_INFO("%zu", edge_count);
+                    //                    ROS_INFO("%zu", edge_count);
                     break;
                 }
             }
@@ -222,7 +235,8 @@ public:
      * @param destination
      * @param weight
      */
-    void insertedge(nodeid_type origin, nodeid_type destination, weight_type weight) {
+    void insertedge(nodeid_type origin, nodeid_type destination, weight_type weight)
+    {
         if (fabs(AdjacencyMatrix[origin][destination] - 0) > 0.01)
         {
             std::cout << "This edge already exits..\n";
@@ -241,7 +255,7 @@ public:
      *@param v It is the new vertex for which we need to find the shortest path from all the vertices in W to v
      *@return The path whose cost is less than all the other shortest path in W
      */
-    vector<nodeid_type> pathfind(const set<nodeid_type>& W, nodeid_type v)
+    vector<nodeid_type> pathfind(const set<nodeid_type> &W, nodeid_type v)
     {
         struct id_dist
         {
@@ -259,10 +273,10 @@ public:
         priority_queue<id_dist, vector<id_dist>, compare_dist> min_heap;
         auto *dist = new weight_type[VERTICES]; // record final min dist from src
         std::for_each(dist, dist + VERTICES, [](weight_type &elem)
-        { elem = INFINITY; });
+                      { elem = INFINITY; });
         bool *visited = new bool[VERTICES];
         std::for_each(visited, visited + VERTICES, [](bool &elem)
-        { elem = false; });
+                      { elem = false; });
         auto *pred = new nodeid_type[VERTICES];
         nodeid_type dest = v;
         double min_dist = INFINITY;
@@ -341,7 +355,7 @@ public:
                     finalEdges.emplace_back(*it1, *it2, INFINITY);
                 }
 
-                for (auto & finalEdge : finalEdges)
+                for (auto &finalEdge : finalEdges)
                 {
                     size_t count = 0, dn = 0;
                     for (Graph::edge &check_edge : edges)
@@ -430,7 +444,8 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
     unsigned long long max_set = (1 << steinerterminals.size()) - 1;
     auto to = vector<vector<message>>(VERTICES, vector<message>(max_set + 1));
     vector<vector<weight_type>> dp(VERTICES, vector<weight_type>(max_set + 1, INFINITY));
-    for (auto it = steinerterminals.begin(); it != steinerterminals.end(); ++it) {
+    for (auto it = steinerterminals.begin(); it != steinerterminals.end(); ++it)
+    {
         dp[*it][1 << (it - steinerterminals.begin())] = 0;
     }
     for (unsigned long long S = 1; S <= max_set; S++) // Enumerate all states defined by K key points
@@ -449,16 +464,18 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
             }
         }
         priority_queue<pair<weight_type, nodeid_type>, vector<pair<weight_type, nodeid_type>>, greater<>> heap;
-        for (size_t i = 0; i < VERTICES; ++i) heap.push(make_pair(dp[i][S], i));
-        while (!heap.empty())  // Slack in S for shortest path
+        for (size_t i = 0; i < VERTICES; ++i)
+            heap.push(make_pair(dp[i][S], i));
+        while (!heap.empty()) // Slack in S for shortest path
         {
             nodeid_type u = heap.top().second;
             heap.pop();
             for (auto &edge : edges)
             {
-                if (u != edge.vertex1 && u != edge.vertex2) continue;
-                nodeid_type v = u == edge.vertex1 ? edge.vertex2 : edge.vertex1; 
-                if (dp[v][S] > dp[u][S] + edge.weight)  // use u-v-S to replace v-S
+                if (u != edge.vertex1 && u != edge.vertex2)
+                    continue;
+                nodeid_type v = u == edge.vertex1 ? edge.vertex2 : edge.vertex1;
+                if (dp[v][S] > dp[u][S] + edge.weight) // use u-v-S to replace v-S
                 {
                     heap.emplace(dp[v][S] = dp[u][S] + edge.weight, v);
                     to[v][S].tp = 1;
@@ -477,7 +494,7 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
         if (dp[i][max_set] < sum)
             sum = dp[i][max_set], root = i;
     }
-    getTree(root, max_set, finalVertices, finalEdges, to, AdjacencyMatrix);  // Retrieve marks of DP
+    getTree(root, max_set, finalVertices, finalEdges, to, AdjacencyMatrix); // Retrieve marks of DP
 
     for (auto &steiner_t : steinerterminals)
     {
@@ -493,7 +510,7 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
     return std::make_pair(finalEdges, finalVertices);
 }
 
-set<nodeid_type> convertIdentifier(const std::map<unsigned, Eigen::Vector3d> &container, const shared_ptr<GridMap>& interface, const string& type)
+set<nodeid_type> convertIdentifier(const std::map<unsigned, Eigen::Vector3d> &container, const shared_ptr<GridMap> &interface, const string &type)
 {
     // Store pose info for graph generation
     // Store ID for tree generation, each target or bs linked to one graph-node
@@ -507,25 +524,31 @@ set<nodeid_type> convertIdentifier(const std::map<unsigned, Eigen::Vector3d> &co
     return id_set;
 }
 
-vector<nodeid_type> GridMapToInnerGraph(const set<nodeid_type>& steiner_terminals, Graph& g, const set<nodeid_type>& set_bs_id){
+vector<nodeid_type> GridMapToInnerGraph(const set<nodeid_type> &steiner_terminals, Graph &g, const set<nodeid_type> &set_bs_id)
+{
     // Convert to graph sub index (after deleting occupied nodes)
     vector<nodeid_type> terminals;
     vector<nodeid_type> converted_bs_id;
     nodeid_type converted_idx = 0;
     auto it = steiner_terminals.begin();
-    while (it != steiner_terminals.end() && converted_idx< VERTICES) {
-        if ((*(g.originalGraph))(converted_idx, converted_idx) == *it) {
+    while (it != steiner_terminals.end() && converted_idx < VERTICES)
+    {
+        if ((*(g.originalGraph))(converted_idx, converted_idx) == *it)
+        {
             terminals.push_back(converted_idx);
-            if (set_bs_id.count(*it)) converted_bs_id.push_back(converted_idx);
+            if (set_bs_id.count(*it))
+                converted_bs_id.push_back(converted_idx);
             ++it;
         }
-        ++converted_idx;  // Assume i and *it both increase monotonously
+        ++converted_idx; // Assume i and *it both increase monotonously
     }
 
     // Add edges between base stations
     // TODO: Discuss the correctness of this method (which assume nodes belong to base stations are initially connected)
-    for (size_t i = 0; i < converted_bs_id.size(); ++i) {
-        for (size_t j = i + 1; j < converted_bs_id.size(); ++j) {
+    for (size_t i = 0; i < converted_bs_id.size(); ++i)
+    {
+        for (size_t j = i + 1; j < converted_bs_id.size(); ++j)
+        {
             g.insertedge(i, j, 0);
         }
     }
@@ -535,19 +558,28 @@ vector<nodeid_type> GridMapToInnerGraph(const set<nodeid_type>& steiner_terminal
 
 std::function<bool(shared_ptr<SteinerTreeNode>, shared_ptr<SteinerTreeNode>)> isVisible;
 
-void Prune(const shared_ptr<SteinerTreeNode>& root, const std::function<bool(shared_ptr<SteinerTreeNode>)>& isDeletable) {
-    if (root == nullptr) return;
-    if (root->id != dummy_root_id) {
+void Prune(const shared_ptr<SteinerTreeNode> &root, const std::function<bool(shared_ptr<SteinerTreeNode>)> &isDeletable)
+{
+    if (root == nullptr)
+        return;
+    if (root->id != dummy_root_id)
+    {
         queue<shared_ptr<SteinerTreeNode>> Q;
-        for (const shared_ptr<SteinerTreeNode>& child : root->children) {
+        for (const shared_ptr<SteinerTreeNode> &child : root->children)
+        {
             Q.push(child);
         }
-        while (!Q.empty()) {
-            shared_ptr<SteinerTreeNode> curr_child = Q.front(); Q.pop();
-            if (curr_child == nullptr || !isDeletable(curr_child)) continue;
-//            if (!all_of(curr_child->children.begin(), curr_child->children.end(), [Func = isVisible, root](auto && PH1) { return Func(root, std::forward<decltype(PH1)>(PH1)); })) continue;
-            if (!all_of(curr_child->children.begin(), curr_child->children.end(), boost::bind(isVisible, root, _1))) continue;
-            for (const shared_ptr<SteinerTreeNode>& child : curr_child->children) {
+        while (!Q.empty())
+        {
+            shared_ptr<SteinerTreeNode> curr_child = Q.front();
+            Q.pop();
+            if (curr_child == nullptr || !isDeletable(curr_child))
+                continue;
+            //            if (!all_of(curr_child->children.begin(), curr_child->children.end(), [Func = isVisible, root](auto && PH1) { return Func(root, std::forward<decltype(PH1)>(PH1)); })) continue;
+            if (!all_of(curr_child->children.begin(), curr_child->children.end(), boost::bind(isVisible, root, _1)))
+                continue;
+            for (const shared_ptr<SteinerTreeNode> &child : curr_child->children)
+            {
                 root->children.insert(child);
                 child->parent = root;
                 Q.push(child);
@@ -556,20 +588,27 @@ void Prune(const shared_ptr<SteinerTreeNode>& root, const std::function<bool(sha
             cout << "[Prune] Deleted " << curr_child->id << "at " << curr_child->pos.transpose() << endl;
         }
     }
-    for (const shared_ptr<SteinerTreeNode>& child : root->children) {
+    for (const shared_ptr<SteinerTreeNode> &child : root->children)
+    {
         Prune(child, isDeletable);
     }
 }
 
-void TraverseTree(const shared_ptr<SteinerTreeNode>& root, vector<Graph::edge>& edge_list, set<shared_ptr<SteinerTreeNode>>& steiner_nodes, map<nodeid_type, set<nodeid_type>> &node_neighbours) {
-    if (root->id == dummy_root_id) {
-        for (const shared_ptr<SteinerTreeNode>& child : root->children) TraverseTree(child, edge_list, steiner_nodes, node_neighbours);
+void TraverseTree(const shared_ptr<SteinerTreeNode> &root, vector<Graph::edge> &edge_list, set<shared_ptr<SteinerTreeNode>> &steiner_nodes, map<nodeid_type, set<nodeid_type>> &node_neighbours)
+{
+    if (root->id == dummy_root_id)
+    {
+        for (const shared_ptr<SteinerTreeNode> &child : root->children)
+            TraverseTree(child, edge_list, steiner_nodes, node_neighbours);
         return;
     }
 
-    if (root->node_type_id.empty()) steiner_nodes.insert(root);  // steiner point has no name yet
-    if (root->parent->id != dummy_root_id) root->neighbours.insert(root->parent);
-    for (const shared_ptr<SteinerTreeNode>& child : root->children) {
+    if (root->node_type_id.empty())
+        steiner_nodes.insert(root); // steiner point has no name yet
+    if (root->parent->id != dummy_root_id)
+        root->neighbours.insert(root->parent);
+    for (const shared_ptr<SteinerTreeNode> &child : root->children)
+    {
         // parent take responsibility to store its neighbour-relationship with child
         edge_list.emplace_back(root->id, child->id);
         node_neighbours[root->id].insert(child->id);
@@ -579,9 +618,10 @@ void TraverseTree(const shared_ptr<SteinerTreeNode>& root, vector<Graph::edge>& 
     }
 }
 
-void visualize_visibility_graph(const ros::Publisher &, double, const shared_ptr<GridMap>&, Eigen::MatrixXd *, std::map<nodeid_type, std::set<nodeid_type>> &, std::vector<Graph::edge> &);
+void visualize_visibility_graph(const ros::Publisher &, double, const shared_ptr<GridMap> &, Eigen::MatrixXd *, std::map<nodeid_type, std::set<nodeid_type>> &, std::vector<Graph::edge> &);
 
-void update_UAV_poses(std::map<unsigned, Eigen::Vector3d> &uav_poses, unsigned required_amount) {
+void update_UAV_poses(std::map<unsigned, Eigen::Vector3d> &uav_poses, unsigned required_amount)
+{
     uav_poses.clear();
     uav_num = required_amount;
     while (uav_poses.size() < uav_num)
@@ -596,7 +636,8 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
     std::map<unsigned, Eigen::Vector3d> &uav_poses,
     ros::NodeHandle &n)
 {
-    if (target_poses.empty()) return {};
+    if (target_poses.empty())
+        return {};
 
     node_to_name.clear();
     set<nodeid_type> set_target_id = convertIdentifier(target_poses, interface, "target");
@@ -616,10 +657,9 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
     ROS_INFO("[steiner_tree] Tree generation complete spent %.5fs\n", (end - start).toSec());
 
     // TODO: How to handle link between base stations
-    vector<edge> steiner_edge_list;  // for building initial tree provided by Steiner algorithm
-    std::for_each(steiner_answer.first.begin(), steiner_answer.first.end(), [&](edge e){
-        steiner_edge_list.emplace_back((*originalGraph)(e.vertex1, e.vertex1), (*originalGraph)(e.vertex2, e.vertex2), e.weight);
-    });
+    vector<edge> steiner_edge_list; // for building initial tree provided by Steiner algorithm
+    std::for_each(steiner_answer.first.begin(), steiner_answer.first.end(), [&](edge e)
+                  { steiner_edge_list.emplace_back((*originalGraph)(e.vertex1, e.vertex1), (*originalGraph)(e.vertex2, e.vertex2), e.weight); });
 
     // After getting initial Steiner tree topology, do pruning to improve the quality of solution
     vector<nodeid_type> roots(set_bs_id.begin(), set_bs_id.end());
@@ -630,9 +670,9 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
     // };
     // Prune(root, isDeletable);
     vector<edge> final_edge_list;
-    set<shared_ptr<SteinerTreeNode>> steiner_nodes; // set of UAV deployment nodes, also return as answer set
-    std::map<nodeid_type, std::set<nodeid_type>> node_neighbours; // key: node ID, value: IDs of all neighbours
-    TraverseTree(root, final_edge_list, steiner_nodes, node_neighbours);  // Rebuild edge list and node set, store neighbourhood
+    set<shared_ptr<SteinerTreeNode>> steiner_nodes;                      // set of UAV deployment nodes, also return as answer set
+    std::map<nodeid_type, std::set<nodeid_type>> node_neighbours;        // key: node ID, value: IDs of all neighbours
+    TraverseTree(root, final_edge_list, steiner_nodes, node_neighbours); // Rebuild edge list and node set, store neighbourhood
 
     /**
      * TODO: What to do if [3. Number requirement decreases]
@@ -645,25 +685,29 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
      *  3. Number requirement decreases: update poses, do KM match and only assign tasks to those matched UAVs
      */
     map<nodeid_type, Eigen::Vector3d> node_locations; // key: node ID, value: location of node. ONLY STEINER POINTS, for matching UAV and node
-    for (const shared_ptr<SteinerTreeNode>& steiner_node_ptr : steiner_nodes)
+    for (const shared_ptr<SteinerTreeNode> &steiner_node_ptr : steiner_nodes)
     {
-        node_locations[steiner_node_ptr->id] = steiner_node_ptr->pos;  // represent current goal position of UAV
+        node_locations[steiner_node_ptr->id] = steiner_node_ptr->pos; // represent current goal position of UAV
     }
     unsigned current_requirement_number = steiner_nodes.size();
 
-    if (current_requirement_number > available_uav_num) {
+    if (current_requirement_number > available_uav_num)
+    {
         ROS_ERROR("[steiner_tree] Require %u relays, but only %u UAVs available", current_requirement_number, available_uav_num);
         return {};
     }
 
-    if (current_requirement_number > last_uav_requirement) {
+    if (current_requirement_number > last_uav_requirement)
+    {
         last_uav_requirement = current_requirement_number;
-        if (current_requirement_number > uav_num) {
+        if (current_requirement_number > uav_num)
+        {
             // Generate new UAVs from 'camp' to satisfy current requirement
             message_files::PoseStampedArray requirement;
             requirement.header.seq = current_requirement_number;
-            for (unsigned uav_seq = uav_num; uav_seq < current_requirement_number; ++uav_seq) {
-                geometry_msgs::PoseStamped p;  // artificial initial position of UAVs
+            for (unsigned uav_seq = uav_num; uav_seq < current_requirement_number; ++uav_seq)
+            {
+                geometry_msgs::PoseStamped p; // artificial initial position of UAVs
                 p.header.seq = uav_seq;
                 // p.pose.position.x = -10.0;
                 // p.pose.position.y = -5.0 + 2.0 * uav_seq;
@@ -692,8 +736,10 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
     {
         string name = "uav_" + std::to_string(uav_id);
         node_to_name[node_id] = name;
-        for (const shared_ptr<SteinerTreeNode>& steiner_node : steiner_nodes) {
-            if (steiner_node->id == node_id) {
+        for (const shared_ptr<SteinerTreeNode> &steiner_node : steiner_nodes)
+        {
+            if (steiner_node->id == node_id)
+            {
                 steiner_node->node_type_id = name;
                 break;
             }
@@ -707,10 +753,10 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
     for (auto &[node_id, neighbour] : node_neighbours)
     {
         message_files::SteinerTreeNode tmp;
-        
+
         string name_id = node_to_name[node_id];
         tmp.name_id = name_id;
-        
+
         unsigned uav_id = name_id[0] == 'u' ? stoi(name_id.substr(4)) : 0;
         tmp.header.seq = uav_id;
 
@@ -730,10 +776,10 @@ set<shared_ptr<SteinerTreeNode>> Graph::getAllocation(
 }
 
 void visualize_visibility_graph(const ros::Publisher &pub_tree_network,
-                                double grid_size, const shared_ptr<GridMap>& interface, Eigen::MatrixXd *adjMatPtr,
+                                double grid_size, const shared_ptr<GridMap> &interface, Eigen::MatrixXd *adjMatPtr,
                                 std::map<nodeid_type, std::set<nodeid_type>> &node_neighbours, std::vector<Graph::edge> &final_edges)
 {
-//    ROS_INFO("[DEBUG] Grid size is %.2f", grid_size);
+    //    ROS_INFO("[DEBUG] Grid size is %.2f", grid_size);
     // Clear exisiting markers representing visibility graph
     visualization_msgs::MarkerArray deleteall;
     visualization_msgs::Marker tmp;

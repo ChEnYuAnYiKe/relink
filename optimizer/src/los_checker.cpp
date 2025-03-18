@@ -30,18 +30,18 @@ void LosChecker::init(ros::NodeHandle &nh)
     // std::cout << "Rounding: " << m_grid_map_ptr->coordRounding(tmp) << std::endl;
     // int tmp = 9;
     // std::cout << "Rounding: " << m_grid_map_ptr->adjMatIdxRounding(tmp) << std::endl;
-
 }
 
-bool LosChecker::checkLineOfSight(const Eigen::Vector3d & pt_1, const Eigen::Vector3d & pt_2) {
+bool LosChecker::checkLineOfSight(const Eigen::Vector3d &pt_1, const Eigen::Vector3d &pt_2)
+{
     return m_grid_map_ptr->checkLineOfSight(pt_1, pt_2);
 }
-
 
 void LosChecker::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
 
-    if (m_had_map) return;
+    if (m_had_map)
+        return;
     ROS_INFO("[los_checker]: Received global map\n");
     ROS_INFO("[los_checker]: No map calculated, start construction\n");
 
@@ -49,7 +49,8 @@ void LosChecker::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
     pcl::fromROSMsg(*msg, cloud);
     int pts_num = cloud.points.size();
 
-    if (pts_num == 0) return;
+    if (pts_num == 0)
+        return;
 
     pcl::PointXYZ pt;
     for (int idx = 0; idx < pts_num; idx++)
@@ -63,10 +64,10 @@ void LosChecker::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
     ROS_INFO("[los_checker]: Construction successes!\n");
 
     m_had_map = true;
-
 }
 
-void LosChecker::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg) {
+void LosChecker::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
+{
     ROS_INFO("[los_checker]: Received click map update\n");
 
     // TODO: Future work: 能否做增量式更新？
@@ -76,7 +77,8 @@ void LosChecker::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg) {
     pcl::fromROSMsg(*msg, cloud);
 
     int pts_num = cloud.points.size();
-    if (pts_num == 0) return;
+    if (pts_num == 0)
+        return;
 
     pcl::PointXYZ pt;
     for (int idx = 0; idx < pts_num; idx++)

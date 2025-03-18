@@ -1,6 +1,5 @@
 #include "visibility_graph/graph_constructor.hpp"
 
-
 void GraphConstructor::init(ros::NodeHandle &nh)
 {
 
@@ -27,14 +26,13 @@ void GraphConstructor::init(ros::NodeHandle &nh)
     m_grid_map_ptr->init(m_grid_resolution, m_x_size, m_y_size, m_z_size);
 
     pub_grid_map = m_nh.advertise<visualization_msgs::Marker>("/algorithm/grid_map", 1, true);
-
 }
-
 
 void GraphConstructor::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
     mapCache = msg;
-    if (m_had_map) {
+    if (m_had_map)
+    {
         return;
     }
 
@@ -44,7 +42,8 @@ void GraphConstructor::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &ms
     pcl::fromROSMsg(*msg, cloud);
     int pts_num = cloud.points.size();
 
-    if (pts_num == 0) return;
+    if (pts_num == 0)
+        return;
 
     pcl::PointXYZ pt;
     for (int idx = 0; idx < pts_num; idx++)
@@ -61,11 +60,10 @@ void GraphConstructor::rcvMapCallback(const sensor_msgs::PointCloud2ConstPtr &ms
     ROS_INFO("[graph_constructor]: Construction successes!\n");
 
     m_had_map = true;
-
 }
 
-
-void GraphConstructor::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg) {
+void GraphConstructor::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &msg)
+{
     ROS_INFO("[graph_constructor]: Received click map update\n");
 
     // TODO: Future work: 能否做增量式更新？
@@ -75,7 +73,8 @@ void GraphConstructor::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &
     pcl::fromROSMsg(*msg, cloud);
 
     int pts_num = cloud.points.size();
-    if (pts_num == 0) return;
+    if (pts_num == 0)
+        return;
 
     pcl::PointXYZ pt;
     for (int idx = 0; idx < pts_num; idx++)
@@ -90,18 +89,16 @@ void GraphConstructor::clickMapCallback(const sensor_msgs::PointCloud2ConstPtr &
     ROS_INFO("[graph_constructor]: Update successes!\n");
 }
 
-
-Eigen::MatrixXd* GraphConstructor::getAdjacencyMatrix()
+Eigen::MatrixXd *GraphConstructor::getAdjacencyMatrix()
 {
 
     return m_had_map ? m_grid_map_ptr->getAdjacencyMatrix() : nullptr;
-
 }
 
-void GraphConstructor::drawGridMap() {
+void GraphConstructor::drawGridMap()
+{
     pub_grid_map.publish(m_grid_map_ptr->drawGridMap());
 }
-
 
 // int main(int argc, char **argv)
 // {

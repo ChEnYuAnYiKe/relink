@@ -74,7 +74,8 @@ int main(int argc, char **argv)
     ros::Subscriber sub_bs = n.subscribe<message_files::PoseStampedArray>("bs_pos", 1, boost::bind(updateEntityPoseCallback, _1, boost::ref(generator.bs_poses)));
     ros::Subscriber sub_uav = n.subscribe<message_files::PoseStampedArray>("uav_pos", 1, boost::bind(updateEntityPoseCallback, _1, boost::ref(generator.uav_poses)));
 
-    while (generator.global_pcl.empty()) ros::spinOnce();
+    while (generator.global_pcl.empty())
+        ros::spinOnce();
     /**
      * Get graph (only depend on the map generated) from vg_constructor and other information
      * Vertices: all vertices in graph, in pre-decided struct Vertex {id: nodeid_type, info: TBD(required flag: BS, target, normal visiblity graph node)}
@@ -84,7 +85,8 @@ int main(int argc, char **argv)
     GraphConstructor vg_constructor;
     vg_constructor.init(n);
     Eigen::MatrixXd *adjMatPtr = nullptr;
-    while ((adjMatPtr = vg_constructor.getAdjacencyMatrix()) == nullptr) ros::spinOnce();
+    while ((adjMatPtr = vg_constructor.getAdjacencyMatrix()) == nullptr)
+        ros::spinOnce();
     VERTICES = std::sqrt(adjMatPtr->size());
 
     Graph g(VERTICES, *adjMatPtr);
@@ -102,17 +104,21 @@ int main(int argc, char **argv)
         while (!*reset_episode)
         {
             // Update pose information of targets and bss
-            generator.target_poses.clear(); generator.bs_poses.clear(); generator.uav_poses.clear();
-            while (generator.target_poses.empty() || generator.bs_poses.empty()) ros::spinOnce();  // Update targets and bss' poses
+            generator.target_poses.clear();
+            generator.bs_poses.clear();
+            generator.uav_poses.clear();
+            while (generator.target_poses.empty() || generator.bs_poses.empty())
+                ros::spinOnce(); // Update targets and bss' poses
 
             /* Initial assignment */
             // if (topology_generation_required)
-            if (topology_initiaized) {
+            if (topology_initiaized)
+            {
                 topology_initiaized = false;
                 // Run steiner tree once to get uav number and publish, get uav poses and network topology
 
                 g.getAllocation(generator.target_poses, generator.bs_poses, generator.uav_poses,
-                                                         *vg_constructor.grid_map_interface(), n);
+                                *vg_constructor.grid_map_interface(), n);
                 ROS_INFO("[algorithm] Network topology of episode %d initialized", *episode_seq);
             }
         }

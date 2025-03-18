@@ -38,7 +38,7 @@
 
         <remap from="/global_map" to="/map_generator/inflated_global_cloud"/>
     </node>
-    
+
     <node pkg="optimizer" name="optimizer" type="optimizer" output="screen">
         <param name="optimizer/approximation_quality" value="50.0" type="double"/>
         <param name="optimizer/safe_margin" value="2.0" type="double"/>

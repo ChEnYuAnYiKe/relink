@@ -15,7 +15,7 @@
     </include>
 
     <include file="$(find simulator)/launch/episode_controller.launch">
-        
+
     </include>
 
     <arg name="map_size_x" value="20.0"/>
@@ -41,7 +41,7 @@
         <remap from="/global_map" to="/map_generator/inflated_global_cloud"/>
         <remap from="~uav_num" to="uav_num"/>
     </node>
-    
+
     <node pkg="optimizer" name="optimizer" type="optimizer" output="screen">
         <param name="optimizer/approximation_quality" value="50.0" type="double"/>
         <param name="optimizer/safe_margin" value="2.0" type="double"/>

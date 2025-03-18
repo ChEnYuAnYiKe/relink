@@ -414,7 +414,8 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
     unsigned long long max_set = (1 << steinerterminals.size()) - 1;
     auto to = vector<vector<message>>(VERTICES, vector<message>(max_set + 1));
     vector<vector<weight_type>> dp(VERTICES, vector<weight_type>(max_set + 1, INFINITY));
-    for (auto it = steinerterminals.begin(); it != steinerterminals.end(); ++it) {
+    for (auto it = steinerterminals.begin(); it != steinerterminals.end(); ++it)
+    {
         dp[*it][1 << (it - steinerterminals.begin())] = 0;
     }
     for (unsigned long long S = 1; S <= max_set; S++) // 枚举K个关键点的所有状态
@@ -441,8 +442,9 @@ std::pair<vector<Graph::edge>, set<nodeid_type>> Graph::SteinerTreeRecursive()
             heap.pop();
             for (auto &edge : edges)
             {
-                if (u != edge.vertex1 && u != edge.vertex2) continue;
-                nodeid_type v = u == edge.vertex1 ? edge.vertex2 : edge.vertex1; 
+                if (u != edge.vertex1 && u != edge.vertex2)
+                    continue;
+                nodeid_type v = u == edge.vertex1 ? edge.vertex2 : edge.vertex1;
                 if (dp[v][S] > dp[u][S] + edge.weight)
                 {
                     heap.emplace(dp[v][S] = dp[u][S] + edge.weight, v);

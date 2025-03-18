@@ -49,9 +49,7 @@ void StarConvexOptimizer::init(ros::NodeHandle &nh)
     //     solution << 10000, 10000, 10000;
     // }
     m_goal_pos.setZero();
-
 }
-
 
 void StarConvexOptimizer::optCallback(const ros::TimerEvent &e)
 {
@@ -66,7 +64,7 @@ void StarConvexOptimizer::optCallback(const ros::TimerEvent &e)
 
 // Function rcvReachingSignalCallback
 // Receives the signal if the uav reach its goal.
-void StarConvexOptimizer::rcvReachingSignalCallback(const std_msgs::Header& msg)
+void StarConvexOptimizer::rcvReachingSignalCallback(const std_msgs::Header &msg)
 {
     // ROS_INFO("[optimizer] The id is %d\n", msg.seq);
     if (msg.seq == -1)
@@ -81,11 +79,11 @@ void StarConvexOptimizer::rcvReachingSignalCallback(const std_msgs::Header& msg)
  * Receives the SCP messages and operates the assignment.
  * In practice, everytime this function called, new set of star convex has been created,
  * the number of SCPs and meshes in them may have changed, so just re-store them.
- * TODO: Some way to tell this function which part of SCPs changed and which not, to accelarate 
+ * TODO: Some way to tell this function which part of SCPs changed and which not, to accelarate
  * (eliminate the operation 'm_polytopes.clear();')
-*/
-void StarConvexOptimizer::scpCallback(const message_files::StarConvexPolytopesStampedConstPtr& msg)
-{ 
+ */
+void StarConvexOptimizer::scpCallback(const message_files::StarConvexPolytopesStampedConstPtr &msg)
+{
 
     // int index = msg->header.seq;
 
@@ -150,7 +148,8 @@ void StarConvexOptimizer::scpCallback(const message_files::StarConvexPolytopesSt
             }
 
             // temporary handle: delete the polygon under the ground
-            if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1) continue;
+            if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1)
+                continue;
 
             curr_polypote.polygons.push_back(polygon_tmp);
         }
@@ -177,8 +176,8 @@ void StarConvexOptimizer::scpCallback(const message_files::StarConvexPolytopesSt
     ROS_INFO("[optimizer] The duration of the optimization for UAV %d: %.5fs\n", msg->header.seq, (end - start).toSec());
 }
 
-
-Polytope StarConvexOptimizer::transformStarConvexPolytopeType(const message_files::StarConvexPolytope& SCP) {
+Polytope StarConvexOptimizer::transformStarConvexPolytopeType(const message_files::StarConvexPolytope &SCP)
+{
     Polytope curr_polypote;
     curr_polypote.center(0) = SCP.center.x;
     curr_polypote.center(1) = SCP.center.y;
@@ -200,7 +199,8 @@ Polytope StarConvexOptimizer::transformStarConvexPolytopeType(const message_file
         }
 
         // temporary handle: delete the polygon under the ground
-        if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1) continue;
+        if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1)
+            continue;
 
         curr_polypote.polygons.push_back(polygon_tmp);
     }
@@ -218,8 +218,7 @@ Polytope StarConvexOptimizer::transformStarConvexPolytopeType(const message_file
     return curr_polypote;
 }
 
-
-Eigen::Vector3d StarConvexOptimizer::solveOptimalPose(const Eigen::Vector3d& curr_pos, const Eigen::Vector3d& goal_pos, const message_files::StarConvexPolytopesStamped& SCPs)
+Eigen::Vector3d StarConvexOptimizer::solveOptimalPose(const Eigen::Vector3d &curr_pos, const Eigen::Vector3d &goal_pos, const message_files::StarConvexPolytopesStamped &SCPs)
 {
     int uav_id = SCPs.header.seq;
 
@@ -262,7 +261,8 @@ Eigen::Vector3d StarConvexOptimizer::solveOptimalPose(const Eigen::Vector3d& cur
             }
 
             // temporary handle: delete the polygon under the ground
-            if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1) continue;
+            if (polygon_tmp[0](2) < 0.1 || polygon_tmp[1](2) < 0.1 || polygon_tmp[2](2) < 0.1)
+                continue;
 
             curr_polypote.polygons.push_back(polygon_tmp);
         }
@@ -321,22 +321,25 @@ Eigen::Vector3d StarConvexOptimizer::solveOptimalPose(const Eigen::Vector3d& cur
     //           << x.transpose() << std::endl;
 
     ros::Time end = ros::Time::now();
-//    ROS_INFO("[optimizer] Optimization for UAV %d: status code %d, used %.5fs\n", SCPs.header.seq, ret, (end - start).toSec());
-//    std::cout << x.transpose() << std::endl;
-    if (ret != 0) ROS_WARN("[optimizer] Optimization for UAV %d status %d, used %.5fs\n", SCPs.header.seq, ret, (end - start).toSec());
+    //    ROS_INFO("[optimizer] Optimization for UAV %d: status code %d, used %.5fs\n", SCPs.header.seq, ret, (end - start).toSec());
+    //    std::cout << x.transpose() << std::endl;
+    if (ret != 0)
+        ROS_WARN("[optimizer] Optimization for UAV %d status %d, used %.5fs\n", SCPs.header.seq, ret, (end - start).toSec());
 
     return x;
 }
 
-
-Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Agent>& uav_data_array)
+Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Agent> &uav_data_array)
 {
     int agent_num = uav_data_array.size();
     // judge if reaching goal in fast-planner
-    for (int agent_id = 0; agent_id < agent_num; agent_id++) {
+    for (int agent_id = 0; agent_id < agent_num; agent_id++)
+    {
         // ignore the agent without missions
-        if (uav_data_array[agent_id].SCPs.SCPs.empty()) continue;
-        if (!m_has_reached_goal[agent_id]) return m_curr_solution;
+        if (uav_data_array[agent_id].SCPs.SCPs.empty())
+            continue;
+        if (!m_has_reached_goal[agent_id])
+            return m_curr_solution;
     }
     // std::cout << "[debug] has reach goal: ";
     // for (int i = 0; i < agent_num; i++) {
@@ -348,11 +351,13 @@ Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Age
     m_agents.clear();
     m_agents.resize(agent_num);
     Eigen::VectorXd x(3 * agent_num);
-    for (size_t agent_index = 0; agent_index < agent_num; agent_index++) {
+    for (size_t agent_index = 0; agent_index < agent_num; agent_index++)
+    {
         m_agents[agent_index].current_position = uav_data_array[agent_index].current_position;
-        m_agents[agent_index].goal_position    = uav_data_array[agent_index].goal_position;
+        m_agents[agent_index].goal_position = uav_data_array[agent_index].goal_position;
 
-        for (auto polytope : uav_data_array[agent_index].SCPs.SCPs) {
+        for (auto polytope : uav_data_array[agent_index].SCPs.SCPs)
+        {
             Polytope curr_polypote = transformStarConvexPolytopeType(polytope);
             m_agents[agent_index].polytopes.push_back(curr_polypote);
         }
@@ -361,11 +366,14 @@ Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Age
         x.segment(3 * agent_index, 3) = m_agents[agent_index].goal_position;
     }
 
-    if (!m_is_first_solution && m_goal_pos == uav_data_array[0].goal_position) {
-        if (m_goal_pos != uav_data_array[0].goal_position) {
+    if (!m_is_first_solution && m_goal_pos == uav_data_array[0].goal_position)
+    {
+        if (m_goal_pos != uav_data_array[0].goal_position)
+        {
             m_goal_pos = uav_data_array[0].goal_position;
         }
-        else {
+        else
+        {
             x = m_curr_solution;
         }
     }
@@ -398,7 +406,8 @@ Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Age
     //           << x.transpose() << std::endl;
 
     ros::Time end = ros::Time::now();
-    if (ret != 0 || ret != 1) ROS_WARN("[optimizer] Optimization for all UAVs status %d, used %.5fs\n", ret, (end - start).toSec());
+    if (ret != 0 || ret != 1)
+        ROS_WARN("[optimizer] Optimization for all UAVs status %d, used %.5fs\n", ret, (end - start).toSec());
 
     m_curr_solution = x;
     // m_is_first_solution = false;
@@ -406,8 +415,7 @@ Eigen::VectorXd StarConvexOptimizer::solveOptimalPoseArray(const std::vector<Age
     return x;
 }
 
-
-void StarConvexOptimizer::goalPublish(const Eigen::Vector3d& x)
+void StarConvexOptimizer::goalPublish(const Eigen::Vector3d &x)
 {
 
     geometry_msgs::PointStamped msg;
@@ -438,31 +446,26 @@ void StarConvexOptimizer::goalPublish(const Eigen::Vector3d& x)
     msg.point.z = m_current_pos(2);
 
     m_cur_pos_pub.publish(msg);
-
 }
-
 
 /* Function heightConstraint
 calculates the height constraint of a variable. */
-double StarConvexOptimizer::heightConstraint(const Eigen::Vector3d& x)
+double StarConvexOptimizer::heightConstraint(const Eigen::Vector3d &x)
 {
 
     // std::cout << m_height_min << std::endl;
     return 0 < m_height_min - x(2) ? pow(m_height_min - x(2), 2) : 0;
-
 }
 
-
-double StarConvexOptimizer::gradOfHeight(const Eigen::Vector3d& x)
+double StarConvexOptimizer::gradOfHeight(const Eigen::Vector3d &x)
 {
 
     return 0 < m_height_min - x(2) ? 2 * m_lambda * (x(2) - m_height_min) : 0;
 }
 
-
 /* Function starConvexConstraint
 calculates the star convex constraint of a variable in DISTRIBUTED optimization. */
-double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d& x, int index)
+double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d &x, int index)
 {
 
     // Operate point transformation
@@ -495,13 +498,12 @@ double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d& x, int i
     {
         return 0;
     }
-
 }
-
 
 /* Function starConvexConstraint
 calculates the star convex constraint of a variable in CENTRALIZED optimization. */
-double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d& x, int agent_index, int neighbor_index) {
+double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d &x, int agent_index, int neighbor_index)
+{
     // Operate point transformation
     Eigen::Vector3d x_cap = pointTransform(x - m_agents[agent_index].polytopes[neighbor_index].center);
     // x_cap += m_polytopes[index].center; // 为什么不给人加回去？？因为前面有人负重前行
@@ -512,8 +514,8 @@ double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d& x, int a
     Eigen::Array<long double, -1, 1> distances(n);
     for (int i = 0; i < n; i++)
     {
-        distances(i) = getPoint2PlaneDistance(x_cap, 
-                                              m_agents[agent_index].polytopes[neighbor_index].polygons[i], 
+        distances(i) = getPoint2PlaneDistance(x_cap,
+                                              m_agents[agent_index].polytopes[neighbor_index].polygons[i],
                                               m_agents[agent_index].polytopes[neighbor_index].center);
     }
     // if (distances(0) != distances(0)) {
@@ -536,10 +538,9 @@ double StarConvexOptimizer::starConvexConstraint(const Eigen::Vector3d& x, int a
     }
 }
 
-
 /* Function gradOfConstraintTerm
 calculates the gradient of the constraint term of a variable in DISTRIBUTED optimization. */
-Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d& x, double J_constraint, int index)
+Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d &x, double J_constraint, int index)
 {
 
     // Operate point transformation
@@ -561,8 +562,8 @@ Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d&
     if (J_constraint > 0)
     {
         g_scp = (3 * m_lambda * std::pow(J_constraint, 2) *
-                (m_alpha * distances).exp().matrix().transpose() * outer_normal_factors /
-                (m_alpha * distances).exp().sum());
+                 (m_alpha * distances).exp().matrix().transpose() * outer_normal_factors /
+                 (m_alpha * distances).exp().sum());
 
         // Eigen::VectorXd::Index row, col;
         // double d_max = distances.matrix().maxCoeff(&row, &col);
@@ -580,13 +581,11 @@ Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d&
     // }
 
     return g_scp;
-
 }
-
 
 /* Function gradOfConstraintTerm
 calculates the gradient of the constraint term of a variable in CENTRALIZED optimization. */
-Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d& x, double J_constraint, 
+Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d &x, double J_constraint,
                                                           int agent_index, int neighbor_index)
 {
 
@@ -609,8 +608,8 @@ Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d&
     if (J_constraint > 0)
     {
         g_scp = (3 * m_lambda * std::pow(J_constraint, 2) *
-                (m_alpha * distances).exp().matrix().transpose() * outer_normal_factors /
-                (m_alpha * distances).exp().sum());
+                 (m_alpha * distances).exp().matrix().transpose() * outer_normal_factors /
+                 (m_alpha * distances).exp().sum());
 
         // Eigen::VectorXd::Index row, col;
         // double d_max = distances.matrix().maxCoeff(&row, &col);
@@ -628,25 +627,21 @@ Eigen::Vector3d StarConvexOptimizer::gradOfConstraintTerm(const Eigen::Vector3d&
     // }
 
     return g_scp;
-
 }
-
 
 /* Function pointTransform
 operates point transformation that flips the point x to outside of the
 sphere boundary, whose radius is m_r_ball. */
-Eigen::Vector3d StarConvexOptimizer::pointTransform(const Eigen::Vector3d& x)
+Eigen::Vector3d StarConvexOptimizer::pointTransform(const Eigen::Vector3d &x)
 {
 
     return x + 2 * (m_r_ball - x.norm()) * x.normalized();
-
 }
 
-
 /* Function getOuterNormalFactor
-calculates the outer normal factor of a plane using 3 points, 
+calculates the outer normal factor of a plane using 3 points,
 which are sorted counterclockwise. */
-inline Eigen::Vector3d StarConvexOptimizer::getOuterNormalFactor(const std::vector<Eigen::Vector3d>& plane, const Eigen::Vector3d& center)
+inline Eigen::Vector3d StarConvexOptimizer::getOuterNormalFactor(const std::vector<Eigen::Vector3d> &plane, const Eigen::Vector3d &center)
 {
 
     Eigen::Vector3d x, y, n;
@@ -662,26 +657,22 @@ inline Eigen::Vector3d StarConvexOptimizer::getOuterNormalFactor(const std::vect
     }
 
     return n.normalized();
-
 }
-
 
 /* Function getPoint2PlaneDistance
 calculates the signed distance from a point to a plane. */
-inline double StarConvexOptimizer::getPoint2PlaneDistance(const Eigen::Vector3d& point, 
-                                                          const std::vector<Eigen::Vector3d>& plane, 
-                                                          const Eigen::Vector3d& center)
+inline double StarConvexOptimizer::getPoint2PlaneDistance(const Eigen::Vector3d &point,
+                                                          const std::vector<Eigen::Vector3d> &plane,
+                                                          const Eigen::Vector3d &center)
 {
 
     return getOuterNormalFactor(plane, center).dot(point - plane[0]);
-
 }
 
-
 /* Function logSumExpCap
-calculates the difference value between the safe margin and the maximum 
+calculates the difference value between the safe margin and the maximum
 of distances. The maximum is approximated using log-sum-exp function. */
-double StarConvexOptimizer::logSumExpCap(const Eigen::Array<long double, -1, 1>& distances)
+double StarConvexOptimizer::logSumExpCap(const Eigen::Array<long double, -1, 1> &distances)
 {
     double d_max = std::log((m_alpha * distances).exp().sum()) / m_alpha;
     // double d_max = distances.matrix().maxCoeff();
@@ -697,12 +688,12 @@ double StarConvexOptimizer::logSumExpCap(const Eigen::Array<long double, -1, 1>&
     //     std::cout << distances.transpose() << std::endl;
     //     ROS_ERROR("[optimizer]: dmax: %f!", d_max);
     // }
-    if (isinf(d_max)) ROS_ERROR("[optimizer]: LSE overflow!");
-    if (isnan(d_max)) ROS_ERROR("[optimizer]: LSE illegal operation!");
+    if (isinf(d_max))
+        ROS_ERROR("[optimizer]: LSE overflow!");
+    if (isnan(d_max))
+        ROS_ERROR("[optimizer]: LSE illegal operation!");
     return m_d_min - d_max;
-
 }
-
 
 /* Function penalty
 turns a hard constraint to a soft constraint. */
@@ -710,11 +701,9 @@ double StarConvexOptimizer::penalty(double x)
 {
 
     return m_lambda * std::pow(std::max(x, 0.0), 3);
-
 }
 
-
-int StarConvexOptimizer::run(const Eigen::Vector3d& pos)
+int StarConvexOptimizer::run(const Eigen::Vector3d &pos)
 {
 
     double final_cost;
@@ -775,12 +764,10 @@ int StarConvexOptimizer::run(const Eigen::Vector3d& pos)
     goalPublish(x);
 
     return ret;
-
 }
 
-
 /* Function costFunction
-calculates the values of the cost function itself 
+calculates the values of the cost function itself
 and the gradients of its variables. */
 double StarConvexOptimizer::costFunction(void *instance,
                                          const Eigen::VectorXd &x,
@@ -830,16 +817,14 @@ double StarConvexOptimizer::costFunction(void *instance,
     g = opt->k_energy * g_energy + opt->k_comm * g_comm + opt->k_goal * g_goal + g_scp;
 
     return fx;
-
 }
 
-
 /* Function costFunctionCentralized
-calculates the values of the cost function itself 
+calculates the values of the cost function itself
 and the gradients of its variables. */
 double StarConvexOptimizer::costFunctionCentralized(void *instance,
-                                         const Eigen::VectorXd &x,
-                                         Eigen::VectorXd &g)
+                                                    const Eigen::VectorXd &x,
+                                                    Eigen::VectorXd &g)
 {
 
     StarConvexOptimizer *opt = reinterpret_cast<StarConvexOptimizer *>(instance);
@@ -857,48 +842,50 @@ double StarConvexOptimizer::costFunctionCentralized(void *instance,
     Eigen::VectorXd g_scp(3 * agent_num);
     g_scp.setZero();
 
-    for (size_t agent_index = 0; agent_index < agent_num; agent_index++) {
-        Eigen::Vector3d x_tmp = x.segment(3*agent_index, 3);
+    for (size_t agent_index = 0; agent_index < agent_num; agent_index++)
+    {
+        Eigen::Vector3d x_tmp = x.segment(3 * agent_index, 3);
         Agent agent = opt->m_agents[agent_index];
 
         J_energy += std::pow((agent.current_position - x_tmp).norm(), 2);
-        g_energy.segment(3*agent_index, 3) = 2 * (x_tmp - agent.current_position);
+        g_energy.segment(3 * agent_index, 3) = 2 * (x_tmp - agent.current_position);
 
-        for (size_t neighbor_index = 0; neighbor_index < agent.polytopes.size(); ++neighbor_index) {
-            auto& neighbor = agent.polytopes[neighbor_index];
-            if (neighbor.name_id[0] == 'u') {
+        for (size_t neighbor_index = 0; neighbor_index < agent.polytopes.size(); ++neighbor_index)
+        {
+            auto &neighbor = agent.polytopes[neighbor_index];
+            if (neighbor.name_id[0] == 'u')
+            {
                 int neighbor_id = std::stoi(neighbor.name_id.substr(4));
-                Eigen::Vector3d x_neighbor = x.segment(3*neighbor_id, 3);
+                Eigen::Vector3d x_neighbor = x.segment(3 * neighbor_id, 3);
 
                 J_comm += std::pow((x_neighbor - x_tmp).norm(), 2);
-                g_comm.segment(3*agent_index, 3) += 2 * (x_tmp - x_neighbor);
+                g_comm.segment(3 * agent_index, 3) += 2 * (x_tmp - x_neighbor);
             }
-            else {
+            else
+            {
                 J_comm += std::pow((neighbor.center - x_tmp).norm(), 2);
-                g_comm.segment(3*agent_index, 3) += 2 * (x_tmp - neighbor.center);
+                g_comm.segment(3 * agent_index, 3) += 2 * (x_tmp - neighbor.center);
             }
 
             double constraint_tmp = opt->starConvexConstraint(x_tmp, agent_index, neighbor_index);
             // if (constraint_tmp > 5.0) penalty = 5.0;
             J_constraint += constraint_tmp;
-            g_scp.segment(3*agent_index, 3) += opt->gradOfConstraintTerm(x_tmp, constraint_tmp, agent_index, neighbor_index);
+            g_scp.segment(3 * agent_index, 3) += opt->gradOfConstraintTerm(x_tmp, constraint_tmp, agent_index, neighbor_index);
         }
 
-        J_goal   += std::pow((agent.goal_position    - x_tmp).norm(), 2);
-        g_goal.segment(3*agent_index, 3)   = 2 * (x_tmp - agent.goal_position);
+        J_goal += std::pow((agent.goal_position - x_tmp).norm(), 2);
+        g_goal.segment(3 * agent_index, 3) = 2 * (x_tmp - agent.goal_position);
     }
 
     J_constraint = 0.0;
     g_scp.setZero();
     fx = opt->k_energy * J_energy + opt->k_comm * J_comm + opt->k_goal * J_goal + opt->penalty(J_constraint);
-    g  = opt->k_energy * g_energy + opt->k_comm * g_comm + opt->k_goal * g_goal + g_scp;
+    g = opt->k_energy * g_energy + opt->k_comm * g_comm + opt->k_goal * g_goal + g_scp;
 
     // std::cout << "[debug]J_constraint: " << J_constraint << std::endl;
 
     return fx;
-
 }
-
 
 /* Function monitorProgress
 monitors the progress of the optimization. */
@@ -912,17 +899,15 @@ int StarConvexOptimizer::monitorProgress(void *instance,
 {
     // return 0; // IF NEED MONITOR, UNCOMMENT
     std::cout << std::setprecision(4)
-                  << "================================" << std::endl
-                  << "Iteration: " << k << std::endl
-                  << "Function Value: " << fx << std::endl
-                  << "Gradient: " << g.transpose() << std::endl
-                  << "Variables: " << std::endl
-                  << x.transpose() << std::endl;
+              << "================================" << std::endl
+              << "Iteration: " << k << std::endl
+              << "Function Value: " << fx << std::endl
+              << "Gradient: " << g.transpose() << std::endl
+              << "Variables: " << std::endl
+              << x.transpose() << std::endl;
 
     return 0;
-
 }
-
 
 // int main(int argc, char **argv)
 // {
@@ -931,7 +916,7 @@ int StarConvexOptimizer::monitorProgress(void *instance,
 //     ros::NodeHandle nh("~");
 //     StarConvexOptimizer opt;
 //     opt.init(nh);
-    
+
 //     ros::spin();
 
 //     return 0;

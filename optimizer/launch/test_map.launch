@@ -9,12 +9,12 @@
     <arg name="map_size_z" value="10.0"/>
 
     <include file="$(find map_generator)/launch/map_generator.launch">
-            <arg name="map_size_x_" value="$(arg map_size_x)"/>
-            <arg name="map_size_y_" value="$(arg map_size_y)"/>
-            <arg name="map_size_z_" value="$(arg map_size_z)"/>
-            <!-- Number of circle and pillar obstacles -->
-            <arg name="c_num" value="0"/>
-            <arg name="p_num" value="3"/>
+        <arg name="map_size_x_" value="$(arg map_size_x)"/>
+        <arg name="map_size_y_" value="$(arg map_size_y)"/>
+        <arg name="map_size_z_" value="$(arg map_size_z)"/>
+        <!-- Number of circle and pillar obstacles -->
+        <arg name="c_num" value="0"/>
+        <arg name="p_num" value="3"/>
     </include>
 
 </launch>
