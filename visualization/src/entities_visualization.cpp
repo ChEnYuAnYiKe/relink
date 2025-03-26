@@ -23,19 +23,18 @@ std::uniform_real_distribution<double> rand_h;
 
 struct VisualConfig
 {
-    VisualConfig(const std::string &&name, const std::string &&mesh_path, std::tuple<double, double, double, double>&& rgba):
-    name(name), mesh_path(mesh_path), rgba(rgba) {}
+    VisualConfig(const std::string &&name, const std::string &&mesh_path, std::tuple<double, double, double, double> &&rgba) : name(name), mesh_path(mesh_path), rgba(rgba) {}
 
     std::string name;
     std::string mesh_path;
     std::tuple<double, double, double, double> rgba;
-    double scale;  // Set by parametre server
+    double scale; // Set by parametre server
 };
 
-VisualConfig* type_config[4] = {
+VisualConfig *type_config[4] = {
     new VisualConfig(std::string("target"),
-                    //  "package://visualization/meshes/bugatti.ply",
-                    "package://visualization/meshes/untitled.stl",
+                     //  "package://visualization/meshes/bugatti.ply",
+                     "package://visualization/meshes/untitled.stl",
                      std::make_tuple(0.0, 0.0, 1.0, 1.0)),
     new VisualConfig(std::string("base_station"),
                      "package://visualization/meshes/SSN.dae",
@@ -49,7 +48,7 @@ VisualConfig* type_config[4] = {
 
 ros::Publisher entityMarkerPub;
 
-visualization_msgs::Marker curr_marker;  // Predefined variable
+visualization_msgs::Marker curr_marker; // Predefined variable
 
 visualization_msgs::MarkerArray uav_marker_array;
 visualization_msgs::MarkerArray target_marker_array;
@@ -57,15 +56,18 @@ visualization_msgs::MarkerArray bs_marker_array;
 visualization_msgs::MarkerArray solution_marker_array;
 
 void updateEntityMarker(const std::map<unsigned, Eigen::Vector3d> &poses, visualization_msgs::MarkerArray &container, int type)
-{   
+{
     // ROS_INFO("[entities_visualization] Entity drawer called for %s", type_config[type]->name.c_str());
     curr_marker.ns = type_config[type]->name; // ns together with id form a unique identifier
 
     /* Marker drawing configuration */
-    if (type_config[type]->mesh_path.size() == 0) {
+    if (type_config[type]->mesh_path.size() == 0)
+    {
         curr_marker.type = visualization_msgs::Marker::SPHERE;
         curr_marker.mesh_resource = "";
-    } else {
+    }
+    else
+    {
         curr_marker.type = visualization_msgs::Marker::MESH_RESOURCE;
         curr_marker.mesh_resource = type_config[type]->mesh_path;
     }
@@ -75,8 +77,8 @@ void updateEntityMarker(const std::map<unsigned, Eigen::Vector3d> &poses, visual
              curr_marker.color.a) = type_config[type]->rgba;
     curr_marker.action = visualization_msgs::Marker::ADD;
     curr_marker.scale.x =
-    curr_marker.scale.y =
-    curr_marker.scale.z = type_config[type]->scale;
+        curr_marker.scale.y =
+            curr_marker.scale.z = type_config[type]->scale;
 
     container.markers.clear();
     unsigned id = 0;
@@ -85,8 +87,10 @@ void updateEntityMarker(const std::map<unsigned, Eigen::Vector3d> &poses, visual
         curr_marker.id = id++;
         curr_marker.pose.position.x = entity_pose(0);
         curr_marker.pose.position.y = entity_pose(1);
-        if (type == BASE_STATION) curr_marker.pose.position.z = 0.0;
-        else curr_marker.pose.position.z = entity_pose(2);
+        if (type == BASE_STATION)
+            curr_marker.pose.position.z = 0.0;
+        else
+            curr_marker.pose.position.z = entity_pose(2);
         container.markers.push_back(curr_marker);
     }
 }
@@ -114,9 +118,11 @@ int main(int argc, char **argv)
     LosChecker los_checker;
     los_checker.init(n);
     los_checker.grid_map_interface()->occupy_threshold = 1;
-    isVisible = [&](const Eigen::Vector3d & pt_1, const Eigen::Vector3d & pt_2) {
+    isVisible = [&](const Eigen::Vector3d &pt_1, const Eigen::Vector3d &pt_2)
+    {
         // Call visibility_graph/los_checker to check visibility
-        if ((pt_1 - pt_2).norm() > QOS_THRESHOLD) return false;
+        if ((pt_1 - pt_2).norm() > QOS_THRESHOLD)
+            return false;
         return los_checker.checkLineOfSight(pt_1, pt_2);
     };
 
@@ -124,7 +130,7 @@ int main(int argc, char **argv)
     entityMarkerPub = n.advertise<visualization_msgs::MarkerArray>("entities", 10, false);
     pub_edge = n.advertise<visualization_msgs::MarkerArray>("edge", 10, false);
 
-    ros::Subscriber sub_tree_array = n.subscribe("/algorithm/tree", 1, storeNeighbourhoodCallback);   
+    ros::Subscriber sub_tree_array = n.subscribe("/algorithm/tree", 1, storeNeighbourhoodCallback);
 
     ros::Subscriber sub_target = n.subscribe<message_files::PoseStampedArray>("/target_pos", 10, boost::bind(updateEntityPoseCallback, _1, boost::ref(target_poses), TARGET));
     ros::Subscriber sub_bs = n.subscribe<message_files::PoseStampedArray>("/bs_pos", 10, boost::bind(updateEntityPoseCallback, _1, boost::ref(bs_poses), BASE_STATION));
@@ -147,7 +153,7 @@ int main(int argc, char **argv)
 
     edge_list.header.frame_id = std::string("world");
     edge_list.header.stamp = ros::Time::now();
-    edge_list.ns = std::string("edge");  // type-specified later
+    edge_list.ns = std::string("edge"); // type-specified later
     edge_list.type = visualization_msgs::Marker::LINE_LIST;
     edge_list.action = visualization_msgs::Marker::ADD;
     edge_list.pose.position.x = 0;
@@ -166,13 +172,16 @@ int main(int argc, char **argv)
     edge_list.color.a = n.param("edge_a", 0.8);
     weak_edge_a = n.param("weak_edge_a", 0.2);
 
-    while (ros::ok()) {
+    while (ros::ok())
+    {
         ros::spinOnce();
 
         // updateEntityMarker(target_poses, target_marker_array, TARGET); entityMarkerPub.publish(target_marker_array);
-        updateEntityMarker(bs_poses, bs_marker_array, BASE_STATION); entityMarkerPub.publish(bs_marker_array);
+        updateEntityMarker(bs_poses, bs_marker_array, BASE_STATION);
+        entityMarkerPub.publish(bs_marker_array);
         // updateEntityMarker(uav_poses, uav_marker_array, UAV); entityMarkerPub.publish(uav_marker_array);
-        updateEntityMarker(solution_poses, solution_marker_array, SOLUTION); entityMarkerPub.publish(solution_marker_array);
+        updateEntityMarker(solution_poses, solution_marker_array, SOLUTION);
+        entityMarkerPub.publish(solution_marker_array);
 
         generateNetworkMarker();
         pub_edge.publish(edge_marker_array);
